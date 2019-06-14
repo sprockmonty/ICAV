@@ -1,5 +1,6 @@
 import redis
 import subprocess
+
 class gpsMessages:
     def __init__(self):
         self._globalLatLong = [0.0,0.0]

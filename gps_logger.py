@@ -1,11 +1,10 @@
-#!/usr/bin/env python
 import rospy
 import math
 import time
 from geometry_msgs.msg import PoseStamped
-from sensor_msgs.msg import NavSatFixi
+from sensor_msgs.msg import NavSatFix
 import subprocess
-
+import redis
 class gpsLogger:
     def __init__(self):
         self._globalLatLong = [0.0,0.0] #global location [lat,long]
@@ -14,7 +13,7 @@ class gpsLogger:
         self._jobID = 0
         subprocess.Popen(["redis-server"])
         self._red = redis.Redis(host='localhost', port=6379, db=0)
-        self._pRed = pubsub()
+        self._pRed = self._red.pubsub()
         self._pRed.subscribe('gps')
 
     def locationCallback(self,msg):
@@ -22,7 +21,9 @@ class gpsLogger:
         self._globalLatLong[1] = msg.longitude
         self._globalAlt = msg.altitude
         #Use dictionary to log position, time and file location
-        self._red.publish(self._globalLatLong)
+        messageOut =''.join(str(self._globalLatLong))
+        self._red.publish('gps',messageOut)
+        print(messageOut)
     
     def getLocation():
         return self._globalLatLong
